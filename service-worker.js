@@ -1,4 +1,4 @@
-const CACHE = 'painel-estudos-pwa-v1.1';
+const CACHE = 'painel-estudos-pwa-v21.9';
 const CORE = ['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 const EXTERNAL = [
   'https://cdn.tailwindcss.com',
