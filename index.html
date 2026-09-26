@@ -4886,11 +4886,11 @@
         };
     </script>
 
-<!-- V21.13 · Sincronização Supabase -->
+<!-- V21.14 · Sincronização Supabase -->
 <div id="cloudSyncButton" style="position:fixed;right:16px;bottom:16px;z-index:70">
-  <button onclick="openCloudSync()" style="border:0;border-radius:999px;padding:11px 15px;background:#0f172a;color:white;box-shadow:0 8px 24px #0003;font:600 12px system-ui;cursor:pointer">☁ <span id="cloudSyncLabel">Sincronização</span></button>
+  <button id="cloudSyncOpenBtn" type="button" style="border:0;border-radius:999px;padding:11px 15px;background:#0f172a;color:white;box-shadow:0 8px 24px #0003;font:600 12px system-ui;cursor:pointer">☁ <span id="cloudSyncLabel">Sincronização</span></button>
 </div>
-<div id="cloudSyncModal" class="hidden" style="position:fixed;inset:0;z-index:100;background:#020617bb;display:none;align-items:center;justify-content:center;padding:20px">
+<div id="cloudSyncModal" style="position:fixed;inset:0;z-index:100;background:#020617bb;display:none;align-items:center;justify-content:center;padding:20px">
  <div style="width:min(430px,100%);background:#fff;color:#0f172a;border-radius:22px;padding:24px;font-family:system-ui;box-shadow:0 24px 80px #0006">
   <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-size:20px">Sincronização</h2><button onclick="closeCloudSync()" style="border:0;background:transparent;font-size:22px;cursor:pointer">×</button></div>
   <p id="cloudSyncStatus" style="font-size:12px;color:#64748b;margin:8px 0 18px">Entre com o usuário criado no Supabase.</p>
@@ -4911,12 +4911,12 @@
 </div>
 
 <script>
-// V21.13 · Supabase REST sync. Publishable key is intentionally client-side; RLS protects rows.
+// V21.14 · Supabase REST sync. Publishable key is intentionally client-side; RLS protects rows.
 const CLOUD_URL = 'https://ikdpdijalbquhrgsmtkp.supabase.co';
 const CLOUD_KEY = 'sb_publishable_4-VFzatMT1kiHjUQWt5J6g_3PetKVVs';
 let cloudSession = null, cloudSaveTimer = null, cloudBusy = false;
-function openCloudSync(){ const m=document.getElementById('cloudSyncModal');m.style.display='flex';m.classList.remove('hidden'); cloudRender(); }
-function closeCloudSync(){ const m=document.getElementById('cloudSyncModal');m.style.display='none';m.classList.add('hidden'); }
+function openCloudSync(){ const m=document.getElementById('cloudSyncModal'); if(!m)return; m.style.setProperty('display','flex','important'); m.style.visibility='visible'; m.style.opacity='1'; cloudRender(); }
+function closeCloudSync(){ const m=document.getElementById('cloudSyncModal'); if(!m)return; m.style.setProperty('display','none','important'); }
 function cloudSetStatus(t,ok=true){ const e=document.getElementById('cloudSyncStatus'); if(e){e.textContent=t;e.style.color=ok?'#64748b':'#dc2626';} }
 function cloudRender(){ const logged=!!cloudSession?.access_token; document.getElementById('cloudLoginBox').style.display=logged?'none':'block'; document.getElementById('cloudLoggedBox').style.display=logged?'block':'none'; const l=document.getElementById('cloudSyncLabel'); if(l) l.textContent=logged?'Nuvem ativa':'Sincronização'; if(logged) cloudSetStatus('Conectado. Alterações serão enviadas automaticamente.'); }
 async function cloudFetch(path,opts={}){ const h=Object.assign({'apikey':CLOUD_KEY,'Content-Type':'application/json'},opts.headers||{}); if(cloudSession?.access_token)h.Authorization='Bearer '+cloudSession.access_token; const r=await fetch(CLOUD_URL+path,Object.assign({},opts,{headers:h})); if(!r.ok) throw new Error((await r.text())||('HTTP '+r.status)); return r; }
@@ -4931,6 +4931,7 @@ async function cloudApply(data){ if(!data?.semestres)throw new Error('Dados remo
 function cloudScheduleSave(){ if(!cloudSession?.access_token)return; clearTimeout(cloudSaveTimer); cloudSaveTimer=setTimeout(()=>cloudUpload(false),1200); }
 async function cloudLogout(){ cloudSession=null;localStorage.removeItem('med_cloud_session');cloudRender();cloudSetStatus('Sessão encerrada. Os dados locais foram mantidos.'); }
 try{ const saved=JSON.parse(localStorage.getItem('med_cloud_session')||'null'); if(saved?.access_token) cloudSession=saved; }catch(e){}
+const cloudOpenBtn=document.getElementById('cloudSyncOpenBtn'); if(cloudOpenBtn){ cloudOpenBtn.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); openCloudSync(); }); }
 const _localSaveAll=saveAll; saveAll=function(){ const ok=_localSaveAll(); if(ok)cloudScheduleSave(); return ok; };
 window.addEventListener('load',()=>{cloudRender(); if(cloudSession?.access_token) setTimeout(()=>cloudDownload(false).catch(()=>{}),900);});
 </script>
