@@ -4886,7 +4886,7 @@
         };
     </script>
 
-<!-- V21.14 · Sincronização Supabase -->
+<!-- V21.15 · Sincronização Supabase -->
 <div id="cloudSyncButton" style="position:fixed;right:16px;bottom:16px;z-index:70">
   <button id="cloudSyncOpenBtn" type="button" style="border:0;border-radius:999px;padding:11px 15px;background:#0f172a;color:white;box-shadow:0 8px 24px #0003;font:600 12px system-ui;cursor:pointer">☁ <span id="cloudSyncLabel">Sincronização</span></button>
 </div>
@@ -4911,7 +4911,7 @@
 </div>
 
 <script>
-// V21.14 · Supabase REST sync. Publishable key is intentionally client-side; RLS protects rows.
+// V21.15 · Supabase REST sync. Publishable key is intentionally client-side; RLS protects rows.
 const CLOUD_URL = 'https://ikdpdijalbquhrgsmtkp.supabase.co';
 const CLOUD_KEY = 'sb_publishable_4-VFzatMT1kiHjUQWt5J6g_3PetKVVs';
 let cloudSession = null, cloudSaveTimer = null, cloudBusy = false;
@@ -4920,10 +4920,7 @@ function closeCloudSync(){ const m=document.getElementById('cloudSyncModal'); if
 function cloudSetStatus(t,ok=true){ const e=document.getElementById('cloudSyncStatus'); if(e){e.textContent=t;e.style.color=ok?'#64748b':'#dc2626';} }
 function cloudRender(){ const logged=!!cloudSession?.access_token; document.getElementById('cloudLoginBox').style.display=logged?'none':'block'; document.getElementById('cloudLoggedBox').style.display=logged?'block':'none'; const l=document.getElementById('cloudSyncLabel'); if(l) l.textContent=logged?'Nuvem ativa':'Sincronização'; if(logged) cloudSetStatus('Conectado. Alterações serão enviadas automaticamente.'); }
 async function cloudFetch(path,opts={}){ const h=Object.assign({'apikey':CLOUD_KEY,'Content-Type':'application/json'},opts.headers||{}); if(cloudSession?.access_token)h.Authorization='Bearer '+cloudSession.access_token; const r=await fetch(CLOUD_URL+path,Object.assign({},opts,{headers:h})); if(!r.ok) throw new Error((await r.text())||('HTTP '+r.status)); return r; }
-async function cloudLogin(){ try{ cloudSetStatus('Entrando...'); const email=document.getElementById('cloudEmail').value.trim(), password=document.getElementById('cloudPassword').value; const r=await cloudFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})}); cloudSession=await r.json(); localStorage.setItem('med_cloud_session',JSON.stringify(cloudSession)); cloudRender(); const remote=await cloudGet(); if(!remote){ await cloudUpload(false); cloudSetStatus('Primeira sincronização concluída: dados deste aparelho enviados.'); } else { const localHasData=Object.values(appData?.semestres||{}).some(x=>Object.values(x.themesData||{}).some(a=>(a||[]).length)); if(localHasData){ const useCloud=confirm('Já existem dados na nuvem.
-
-OK = baixar os dados da nuvem neste aparelho.
-Cancelar = manter os dados deste aparelho e enviá-los para a nuvem.'); if(useCloud) await cloudApply(remote.dados); else await cloudUpload(false); } else await cloudApply(remote.dados); } }catch(e){console.error(e);cloudSetStatus('Não foi possível entrar. Confira e-mail e senha.',false);} }
+async function cloudLogin(){ try{ cloudSetStatus('Entrando...'); const email=document.getElementById('cloudEmail').value.trim(), password=document.getElementById('cloudPassword').value; const r=await cloudFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})}); cloudSession=await r.json(); localStorage.setItem('med_cloud_session',JSON.stringify(cloudSession)); cloudRender(); const remote=await cloudGet(); if(!remote){ await cloudUpload(false); cloudSetStatus('Primeira sincronização concluída: dados deste aparelho enviados.'); } else { const localHasData=Object.values(appData?.semestres||{}).some(x=>Object.values(x.themesData||{}).some(a=>(a||[]).length)); if(localHasData){ const useCloud=confirm(`Já existem dados na nuvem.\n\nOK = baixar os dados da nuvem neste aparelho.\nCancelar = manter os dados deste aparelho e enviá-los para a nuvem.`); if(useCloud) await cloudApply(remote.dados); else await cloudUpload(false); } else await cloudApply(remote.dados); } }catch(e){console.error(e);cloudSetStatus('Não foi possível entrar. Confira e-mail e senha.',false);} }
 async function cloudGet(){ const r=await cloudFetch('/rest/v1/painel_sync?select=dados,versao,updated_at&limit=1'); const a=await r.json(); return a[0]||null; }
 async function cloudUpload(showMessage=false){ if(!cloudSession?.user?.id||cloudBusy)return; try{cloudBusy=true;cloudSetStatus('Enviando para a nuvem...'); const body={user_id:cloudSession.user.id,dados:appData}; await cloudFetch('/rest/v1/painel_sync?on_conflict=user_id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(body)}); cloudSetStatus('Sincronizado às '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})); if(showMessage)alert('Dados enviados para a nuvem.');}catch(e){console.error(e);cloudSetStatus('Falha ao enviar. Os dados continuam salvos neste aparelho.',false);}finally{cloudBusy=false;} }
 async function cloudDownload(confirmFirst=false){ try{if(confirmFirst&&!confirm('Baixar os dados da nuvem e substituir os dados deste aparelho?'))return; const r=await cloudGet(); if(!r){alert('Ainda não há dados na nuvem.');return;} await cloudApply(r.dados); if(confirmFirst)alert('Dados da nuvem carregados.');}catch(e){console.error(e);cloudSetStatus('Falha ao baixar dados da nuvem.',false);} }
