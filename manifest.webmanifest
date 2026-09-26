@@ -1,13 +1,12 @@
 {
-  "id": "./",
   "name": "Painel de Estudos",
-  "short_name": "Estudos",
-  "description": "Painel pessoal de organização de estudos",
-  "start_url": "./index.html",
+  "short_name": "Painel Estudos",
+  "description": "Painel pessoal de estudos",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#071827",
-  "theme_color": "#071827",
+  "background_color": "#f8fafc",
+  "theme_color": "#111827",
   "icons": [
     {
       "src": "./icons/icon-192.png",

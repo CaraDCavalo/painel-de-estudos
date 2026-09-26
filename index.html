@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Estudos</title>
-    <meta name="theme-color" content="#071827">
-    <meta name="mobile-web-app-capable" content="yes">
-    <link rel="manifest" href="./manifest.webmanifest">
-    <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2064%2064%27%3E%0A%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20stop-color%3D%27%2360a5fa%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%238b5cf6%27/%3E%3C/linearGradient%3E%3C/defs%3E%0A%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2715%27%20fill%3D%27%23071827%27/%3E%0A%3Cpath%20d%3D%27M32%207%2051%2015v14c0%2013-7.6%2022.5-19%2028C20.6%2051.5%2013%2042%2013%2029V15L32%207Z%27%20fill%3D%27none%27%20stroke%3D%27url%28%23g%29%27%20stroke-width%3D%275%27%20stroke-linejoin%3D%27round%27/%3E%0A%3Cpath%20d%3D%27M28%2020h8v8h8v8h-8v8h-8v-8h-8v-8h8z%27%20fill%3D%27url%28%23g%29%27/%3E%0A%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -1848,6 +1844,12 @@
 
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <link rel="manifest" href="./manifest.webmanifest">
+    <meta name="theme-color" content="#111827">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 min-h-screen pb-16 transition-colors duration-300">
 
@@ -1892,7 +1894,7 @@
     <!-- NAVEGAÇÃO POR ABAS -->
     <nav class="app-main-nav sticky top-[72px] z-20 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-6 flex overflow-x-auto space-x-8 text-sm text-slate-500 dark:text-slate-400">
-            <button onclick="switchTab('materias')" id="tab-materias" class="py-4 px-1 active-tab flex items-center space-x-2 transition font-medium hover:text-slate-700 dark:hover:text-slate-200">
+<button onclick="switchTab('materias')" id="tab-materias" class="py-4 px-1 active-tab flex items-center space-x-2 transition font-medium hover:text-slate-700 dark:hover:text-slate-200">
                 <i class="fa-solid fa-book-open-reader"></i><span>Estudos</span>
             </button>
             <button onclick="switchTab('pomodoro')" id="tab-pomodoro" class="py-4 px-1 flex items-center space-x-2 transition font-medium hover:text-slate-700 dark:hover:text-slate-200">
@@ -1907,7 +1909,7 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="max-w-7xl mx-auto px-6 py-8">
 
-        <!-- ESTUDOS: página inicial -->
+        <!-- ABA 2: ESTUDOS — MATÉRIAS + TEMAS UNIFICADOS -->
         <section id="sec-materias" class="space-y-6">
             <div class="studies-view-switch">
                 <div>
@@ -2957,12 +2959,15 @@
 
         function initApp() {
             updateSemestreSelector();
+            renderAgendaWeek();
             renderSubjectButtons();
             renderThemeList();
             renderManagePartialSummary();
             renderThemeSubTabs();
             renderThemeSubList();
+            renderCronogramaCustom();
             updateStats();
+            document.getElementById('agendaEditorPanel')?.classList.add('is-collapsed');
         }
 
         function toggleDarkMode() {
@@ -2980,12 +2985,12 @@
         }
 
         function switchTab(tabId) {
-            if (tabId === 'horarios' || tabId === 'metas' || tabId === 'cronograma') tabId = 'materias';
+            if (tabId === 'horarios' || tabId === 'metas') tabId = 'cronograma';
             if (tabId === 'temas') {
                 tabId = 'materias';
                 showStudyView('partial');
             }
-            ['materias', 'pomodoro', 'audio'].forEach(t => {
+            ['cronograma', 'materias', 'pomodoro', 'audio'].forEach(t => {
                 const sec = document.getElementById(`sec-${t}`);
                 const tab = document.getElementById(`tab-${t}`);
                 if (sec) sec.classList.add('hidden');
@@ -3392,16 +3397,7 @@
                     <h1>Cronograma do Dia</h1>
                     <div class="meta">${report.dayLabel} • ${dateText}<br>Semestre: ${report.semestre}</div>
                     ${rows}
-                
-    <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js', { scope: './' })
-          .catch(err => console.warn('Service Worker:', err));
-      });
-    }
-    </script>
-</body>
+                </body>
                 </html>`);
             w.document.close();
             w.focus();
@@ -4888,6 +4884,15 @@
             initApp();
             updateTimerDisplay();
         };
+    </script>
+
+    <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+          .catch(err => console.warn('Service Worker:', err));
+      });
+    }
     </script>
 </body>
 </html>

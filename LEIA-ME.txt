@@ -1,1 +1,1 @@
-V21.11 — Agenda removida da interface. Estudos é a página inicial. Mantém Backup, Pomodoro, Player de Áudio e PWA Android/Windows.
+V21.12 corrigida. Base V21.9 funcional; Agenda removida da interface; Estudos é a tela inicial; PWA Android corrigido sem injetar código dentro de templates JavaScript.
